@@ -26,6 +26,7 @@ The frontend (`../lifevault-frontend`) is a separate Next.js app that talks to t
 ```bash
 npm install
 cp .env.example .env       # fill in MONGODB_URI and JWT_SECRET
+npm run db:init            # verify the connection, build indexes
 npm run dev                # nodemon
 # or: npm start
 ```
@@ -39,6 +40,16 @@ curl http://localhost:5000/api/v1/health
 
 The process refuses to boot without `MONGODB_URI` and a `JWT_SECRET` of at least 32 characters.
 
+### Database setup
+
+`npm run db:init` connects with the configured URI, verifies it names a real database (and refuses `test`), builds every Mongoose index and prints collection counts. Accounts and their ten default categories are created by `POST /auth/register`; no seed data is shipped.
+
+To use MongoDB Atlas:
+
+1. Create a cluster and database user, then allow your host's IP in Network Access.
+2. Copy the SRV string and **append a database name** — `...mongodb.net/lifevault?retryWrites=true&w=majority`. Atlas URIs without a path silently use `test`, which may be shared with other projects.
+3. Set `MONGODB_URI` in `.env`, then run `npm run db:init`.
+
 > **macOS note:** AirPlay listens on port 5000. If `curl localhost:5000` answers with `Server: AirTunes`, set `PORT=5001` here and `NEXT_PUBLIC_API_URL=http://localhost:5001/api/v1` in the frontend `.env.local`.
 
 ## Environment variables
@@ -47,7 +58,7 @@ The process refuses to boot without `MONGODB_URI` and a `JWT_SECRET` of at least
 | --- | --- | --- | --- |
 | `PORT` | no | `5000` | Listen port. |
 | `NODE_ENV` | no | `development` | `development`, `test` or `production`; controls secure cookies and CORS behavior. |
-| `MONGODB_URI` | **yes** | — | Local URI or Atlas SRV string. |
+| `MONGODB_URI` | **yes** | — | Local URI or Atlas SRV string. Always include a database name — Atlas strings without a path connect to `test`. |
 | `JWT_SECRET` | **yes** | — | 32+ random characters (`openssl rand -hex 32`). |
 | `JWT_EXPIRES_IN` | no | `7d` | Token lifetime; keep aligned with the cookie max-age. |
 | `FRONTEND_URL` | **yes** in practice | `http://localhost:3000` | Primary allowed CORS origin; set it to the deployed frontend. |
@@ -63,6 +74,7 @@ The process refuses to boot without `MONGODB_URI` and a `JWT_SECRET` of at least
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Nodemon with reload. |
+| `npm run db:init` | Connect to `MONGODB_URI`, build all indexes, print collection counts. Safe to re-run. |
 | `npm start` | Plain `node src/server.js`. |
 | `npm test` | Integration suite on an in-memory MongoDB. |
 
@@ -169,6 +181,7 @@ Render / Railway / Fly / any Node host works.
 - Environment: `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET` (fresh random value), `FRONTEND_URL=https://your-frontend`, optional `EXTRA_ORIGINS`, and the three `CLOUDINARY_*` values for uploads.
 - Leave `PORT` unset — the platform injects it.
 - Health check path: `/api/v1/health`.
+- After the first deploy (or when rotating databases), run `npm run db:init` once from the host shell to build indexes.
 - Terminate TLS at the host: production cookies are `Secure`, so both the API and the frontend must be HTTPS.
 
 For MongoDB Atlas, add the host IP (or `0.0.0.0/0` for a demo) to Network Access and append a database name to the SRV string.
