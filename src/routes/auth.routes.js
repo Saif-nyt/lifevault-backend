@@ -14,6 +14,7 @@ const router = express.Router();
 
 router.post("/register", authLimiter, validate(registerSchema), controller.register);
 router.post("/login", authLimiter, validate(loginSchema), controller.login);
+router.post("/google", authLimiter, controller.googleLogin);
 router.post("/logout", controller.logout);
 router.get("/me", protect, controller.me);
 router.patch("/me", protect, validate(updateProfileSchema), controller.updateProfile);

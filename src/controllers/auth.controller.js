@@ -5,13 +5,19 @@ const { setAuthCookie, clearAuthCookie } = require("../utils/token");
 async function register(req, res) {
   const { user, token } = await authService.register(req.body);
   setAuthCookie(res, token);
-  sendSuccess(res, { user }, 201);
+  sendSuccess(res, { user, token }, 201);
 }
 
 async function login(req, res) {
   const { user, token } = await authService.login(req.body);
   setAuthCookie(res, token);
-  sendSuccess(res, { user });
+  sendSuccess(res, { user, token });
+}
+
+async function googleLogin(req, res) {
+  const { user, token } = await authService.googleLogin(req.body);
+  setAuthCookie(res, token);
+  sendSuccess(res, { user, token });
 }
 
 async function logout(req, res) {
@@ -34,4 +40,4 @@ async function changePassword(req, res) {
   sendSuccess(res, { message: "Password updated" });
 }
 
-module.exports = { register, login, logout, me, updateProfile, changePassword };
+module.exports = { register, login, logout, me, updateProfile, changePassword, googleLogin };

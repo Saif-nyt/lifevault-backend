@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       maxlength: 254,
     },
     passwordHash: { type: String, required: true, select: false },
+    googleId: { type: String, default: "", index: true },
     avatar: { type: String, default: "" },
     bio: { type: String, default: "", maxlength: 300 },
   },
