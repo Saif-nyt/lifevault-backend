@@ -14,7 +14,6 @@ function cookieOptions() {
     httpOnly: true,
     secure: env.isProd,
     sameSite: env.isProd ? "none" : "lax",
-    domain: ".vercel.app",
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   };
