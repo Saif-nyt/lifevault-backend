@@ -15,6 +15,7 @@ const schema = z.object({
   CLOUDINARY_API_KEY: z.string().optional().default(""),
   CLOUDINARY_API_SECRET: z.string().optional().default(""),
   GOOGLE_WEB_CLIENT_ID: z.string().optional().default(""),
+  GOOGLE_CLIENT_ID: z.string().optional().default(""),
   GOOGLE_ANDROID_CLIENT_ID: z.string().optional().default(""),
 });
 
@@ -35,6 +36,7 @@ env.origins = [env.FRONTEND_URL, ...env.EXTRA_ORIGINS.split(",")]
 env.cloudinaryEnabled = Boolean(
   env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET
 );
+if (!env.GOOGLE_WEB_CLIENT_ID && env.GOOGLE_CLIENT_ID) env.GOOGLE_WEB_CLIENT_ID = env.GOOGLE_CLIENT_ID;
 env.googleClientIds = [env.GOOGLE_WEB_CLIENT_ID, env.GOOGLE_ANDROID_CLIENT_ID].filter(Boolean);
 
 module.exports = env;
