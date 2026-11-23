@@ -30,7 +30,7 @@ const env = parsed.data;
 env.isProd = env.NODE_ENV === "production";
 env.isTest = env.NODE_ENV === "test";
 env.origins = [env.FRONTEND_URL, ...env.EXTRA_ORIGINS.split(",")]
-  .map((origin) => origin.trim())
+  .map((origin) => origin.trim().replace(/\/$/, ""))
   .filter(Boolean);
 env.cloudinaryEnabled = Boolean(
   env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET
