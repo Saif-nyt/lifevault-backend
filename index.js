@@ -1,2 +1,2 @@
-// Compatibility entrypoint. The real server lives in src/server.js.
-require("./src/server");
+// Vercel / serverless entrypoint. Exports the Express app.
+module.exports = require("./src/server");

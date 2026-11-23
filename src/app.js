@@ -7,6 +7,18 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 
 const env = require("./config/env");
+const { connectDatabase } = require("./config/db");
+
+// Ensure DB is connected for serverless (Vercel) cold starts.
+app.use(async (req, res, next) => {
+  try {
+    await connectDatabase();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 const routes = require("./routes");
 const csrfProtection = require("./middleware/csrf");
 const { apiLimiter } = require("./middleware/rateLimit");
