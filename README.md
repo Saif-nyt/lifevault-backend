@@ -66,6 +66,8 @@ To use MongoDB Atlas:
 | `CLOUDINARY_CLOUD_NAME` | for uploads | — | Cloudinary cloud name. |
 | `CLOUDINARY_API_KEY` | for uploads | — | Cloudinary API key. |
 | `CLOUDINARY_API_SECRET` | for uploads | — | Cloudinary API secret. |
+| `GOOGLE_WEB_CLIENT_ID` | for Google sign-in | — | OAuth 2.0 web client ID. |
+| `GOOGLE_ANDROID_CLIENT_ID` | for Google sign-in (Android) | — | OAuth 2.0 Android client ID. |
 
 `COOKIE_SECRET` appears in some docs for parity with the original brief but is not used — the cookie carries a JWT signed with `JWT_SECRET`.
 
