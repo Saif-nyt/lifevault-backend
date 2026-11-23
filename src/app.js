@@ -9,6 +9,13 @@ const multer = require("multer");
 const env = require("./config/env");
 const { connectDatabase } = require("./config/db");
 
+const routes = require("./routes");
+const csrfProtection = require("./middleware/csrf");
+const { apiLimiter } = require("./middleware/rateLimit");
+const { errorHandler, notFound, ApiError } = require("./utils/ApiError");
+
+const app = express();
+
 // Ensure DB is connected for serverless (Vercel) cold starts.
 app.use(async (req, res, next) => {
   try {
@@ -18,13 +25,6 @@ app.use(async (req, res, next) => {
     next(err);
   }
 });
-
-const routes = require("./routes");
-const csrfProtection = require("./middleware/csrf");
-const { apiLimiter } = require("./middleware/rateLimit");
-const { errorHandler, notFound, ApiError } = require("./utils/ApiError");
-
-const app = express();
 
 if (env.isProd) app.set("trust proxy", 1);
 
