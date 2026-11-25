@@ -18,8 +18,7 @@ const schema = z.object({
   CLOUDINARY_API_SECRET: z.string().optional().default(""),
   GOOGLE_WEB_CLIENT_ID: z.string().optional().default(""),
   GOOGLE_CLIENT_ID: z.string().optional().default(""),
-  GOOGLE_ANDROID_CLIENT_ID: z.string().optional().default(""),
-});
+  GOOGLE_ANDROID_CLIENT_ID: z.string().optional().default("923673012580-ikf38u0u5r3lc64uumnnce1mfdqdbojk.apps.googleusercontent.com"),});
 
 const parsed = schema.safeParse(process.env);
 
