@@ -1,11 +1,18 @@
+const crypto = require("node:crypto");
 const jwt = require("jsonwebtoken");
 const env = require("../config/env");
 
 const COOKIE_NAME = "lifevault_token";
 
 function signToken(user) {
-  return jwt.sign({ sub: user._id.toString() }, env.JWT_SECRET, {
+  return jwt.sign({ sub: user._id.toString(), typ: "web" }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRES_IN,
+  });
+}
+
+function signAccessToken(user) {
+  return jwt.sign({ sub: user._id.toString(), typ: "access" }, env.JWT_SECRET, {
+    expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
   });
 }
 
@@ -27,4 +34,21 @@ function clearAuthCookie(res) {
   res.clearCookie(COOKIE_NAME, { ...cookieOptions(), maxAge: undefined });
 }
 
-module.exports = { COOKIE_NAME, signToken, setAuthCookie, clearAuthCookie, cookieOptions };
+function createRefreshToken() {
+  return crypto.randomBytes(48).toString("base64url");
+}
+
+function hashRefreshToken(token) {
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
+
+module.exports = {
+  COOKIE_NAME,
+  signToken,
+  signAccessToken,
+  setAuthCookie,
+  clearAuthCookie,
+  cookieOptions,
+  createRefreshToken,
+  hashRefreshToken,
+};

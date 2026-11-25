@@ -36,7 +36,13 @@ async function connectDatabase(uri = env.MONGODB_URI) {
 }
 
 async function disconnectDatabase() {
-  // No-op on serverless; keep connection warm.
+  // Keep the connection warm on serverless (Vercel). Everywhere else close it
+  // so scripts, tests and local shutdowns can exit cleanly.
+  if (process.env.VERCEL) return;
+  if (!cached.conn) return;
+  await mongoose.disconnect();
+  cached.conn = null;
+  cached.promise = null;
 }
 
 module.exports = { connectDatabase, disconnectDatabase };

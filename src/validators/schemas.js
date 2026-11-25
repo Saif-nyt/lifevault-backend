@@ -20,6 +20,10 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required").max(128),
 });
 
+const refreshSchema = z.object({
+  refreshToken: z.string().trim().min(20, "Refresh token is required").max(500),
+});
+
 const updateProfileSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),
   avatar: z.union([z.string().url().max(2048), z.literal("")]).optional(),
@@ -141,6 +145,7 @@ module.exports = {
   archiveTypes,
   registerSchema,
   loginSchema,
+  refreshSchema,
   updateProfileSchema,
   changePasswordSchema,
   createArchiveSchema,

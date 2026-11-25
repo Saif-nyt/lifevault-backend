@@ -64,6 +64,53 @@ test("login rejects bad credentials and accepts valid ones", async () => {
   assert.equal(res.body.data.user.name, userA.name);
 });
 
+let accessToken;
+let refreshToken;
+
+test("login issues a short-lived access token and a rotating refresh token", async () => {
+  const res = await request(app)
+    .post("/api/v1/auth/login")
+    .send({ email: userA.email, password: userA.password })
+    .expect(200);
+
+  accessToken = res.body.data.accessToken;
+  refreshToken = res.body.data.refreshToken;
+  assert.match(accessToken, /^ey/);
+  assert.ok(refreshToken.length >= 40);
+  assert.equal(res.body.data.token, accessToken);
+
+  const me = await request(app)
+    .get("/api/v1/auth/me")
+    .set("Authorization", `Bearer ${accessToken}`)
+    .expect(200);
+  assert.equal(me.body.data.user.email, userA.email);
+});
+
+test("refresh rotates the token and rejects the previous token", async () => {
+  const refreshed = await request(app)
+    .post("/api/v1/auth/refresh")
+    .send({ refreshToken })
+    .expect(200);
+
+  const nextRefresh = refreshed.body.data.refreshToken;
+  assert.notEqual(nextRefresh, refreshToken);
+  assert.match(refreshed.body.data.accessToken, /^ey/);
+
+  await request(app).post("/api/v1/auth/refresh").send({ refreshToken }).expect(401);
+
+  const me = await request(app)
+    .get("/api/v1/auth/me")
+    .set("Authorization", `Bearer ${refreshed.body.data.accessToken}`)
+    .expect(200);
+  assert.equal(me.body.data.user.email, userA.email);
+
+  refreshToken = nextRefresh;
+});
+
+test("invalid refresh tokens are rejected", async () => {
+  await request(app).post("/api/v1/auth/refresh").send({ refreshToken: "x".repeat(64) }).expect(401);
+});
+
 test("protected endpoints require authentication", async () => {
   await request(app).get("/api/v1/archives").expect(401);
   await request(app).get("/api/v1/auth/me").expect(401);
@@ -216,4 +263,12 @@ test("archive can be deleted and is removed from collections", async () => {
 test("logout clears the session", async () => {
   await agentA.post("/api/v1/auth/logout").expect(200);
   await agentA.get("/api/v1/auth/me").expect(401);
+});
+
+test("mobile logout revokes the refresh token", async () => {
+  await request(app)
+    .post("/api/v1/auth/logout")
+    .send({ refreshToken })
+    .expect(200);
+  await request(app).post("/api/v1/auth/refresh").send({ refreshToken }).expect(401);
 });

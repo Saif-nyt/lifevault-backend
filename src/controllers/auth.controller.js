@@ -3,24 +3,61 @@ const { sendSuccess } = require("../utils/http");
 const { setAuthCookie, clearAuthCookie } = require("../utils/token");
 
 async function register(req, res) {
-  const { user, token } = await authService.register(req.body);
-  setAuthCookie(res, token);
-  sendSuccess(res, { user, token }, 201);
+  const data = await authService.register(req.body, req);
+  setAuthCookie(res, data.webToken);
+  sendSuccess(
+    res,
+    {
+      user: data.user,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      expiresIn: data.expiresIn,
+      token: data.token,
+    },
+    201
+  );
 }
 
 async function login(req, res) {
-  const { user, token } = await authService.login(req.body);
-  setAuthCookie(res, token);
-  sendSuccess(res, { user, token });
+  const data = await authService.login(req.body, req);
+  setAuthCookie(res, data.webToken);
+  sendSuccess(res, {
+    user: data.user,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    expiresIn: data.expiresIn,
+    token: data.token,
+  });
+}
+
+async function refresh(req, res) {
+  const data = await authService.refresh(req.body.refreshToken, req);
+  setAuthCookie(res, data.webToken);
+  sendSuccess(res, {
+    user: data.user,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    expiresIn: data.expiresIn,
+    token: data.token,
+  });
 }
 
 async function googleLogin(req, res) {
-  const { user, token } = await authService.googleLogin(req.body);
-  setAuthCookie(res, token);
-  sendSuccess(res, { user, token });
+  const data = await authService.googleLogin(req.body, req);
+  setAuthCookie(res, data.webToken);
+  sendSuccess(res, {
+    user: data.user,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    expiresIn: data.expiresIn,
+    token: data.token,
+  });
 }
 
 async function logout(req, res) {
+  if (req.body?.refreshToken) {
+    await authService.revokeRefresh(req.body.refreshToken);
+  }
   clearAuthCookie(res);
   sendSuccess(res, { message: "Logged out" });
 }
@@ -37,7 +74,7 @@ async function updateProfile(req, res) {
 
 async function changePassword(req, res) {
   await authService.changePassword(req.user._id, req.body);
-  sendSuccess(res, { message: "Password updated" });
+  sendSuccess(res, { message: "Password updated. Please sign in again on other devices." });
 }
 
-module.exports = { register, login, logout, me, updateProfile, changePassword, googleLogin };
+module.exports = { register, login, refresh, logout, me, updateProfile, changePassword, googleLogin };

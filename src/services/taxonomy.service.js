@@ -44,7 +44,7 @@ async function createCategory(userId, { name, color }) {
     nameKey,
     color: color || "#7A7A7A",
   });
-  return category;
+  return { ...category.toObject(), id: String(category._id) };
 }
 
 async function updateCategory(userId, categoryId, updates) {
@@ -61,7 +61,7 @@ async function updateCategory(userId, categoryId, updates) {
   if (updates.color) category.color = updates.color;
 
   await category.save();
-  return category;
+  return { ...category.toObject(), id: String(category._id) };
 }
 
 async function deleteCategory(userId, categoryId) {
@@ -86,9 +86,10 @@ async function listTags(userId) {
 async function createTag(userId, { name }) {
   const nameKey = name.toLowerCase();
   const exists = await Tag.findOne({ user: userId, nameKey });
-  if (exists) return exists;
+  if (exists) return { ...exists.toObject(), id: String(exists._id) };
 
-  return Tag.create({ user: userId, name, nameKey });
+  const tag = await Tag.create({ user: userId, name, nameKey });
+  return { ...tag.toObject(), id: String(tag._id) };
 }
 
 async function deleteTag(userId, tagId) {

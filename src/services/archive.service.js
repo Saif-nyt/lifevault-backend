@@ -213,9 +213,11 @@ async function updateArchive(userId, archiveId, data) {
     archive.tagNames = names;
   }
 
-  if (data.metadata !== undefined) {
-    const type = data.type || archive.type;
-    archive.metadata = validateMetadata(type, { ...archive.metadata, ...data.metadata });
+  if (data.metadata !== undefined || data.type !== undefined) {
+    const nextType = data.type || archive.type;
+    const typeChanged = data.type !== undefined && data.type !== archive.type;
+    const merged = typeChanged ? data.metadata || {} : { ...archive.metadata, ...(data.metadata || {}) };
+    archive.metadata = validateMetadata(nextType, merged);
   }
 
   for (const field of ["title", "description", "content", "type", "sourceUrl", "attachments", "isFavorite", "reminderAt"]) {

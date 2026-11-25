@@ -2,6 +2,16 @@ const Collection = require("../models/Collection");
 const Archive = require("../models/Archive");
 const { ApiError } = require("../utils/ApiError");
 
+function serializeCollection(collection) {
+  if (!collection) return null;
+  const obj = collection.toObject ? collection.toObject() : { ...collection };
+  return {
+    ...obj,
+    id: String(obj._id),
+    itemCount: (obj.items || []).length,
+  };
+}
+
 async function listCollections(userId) {
   const collections = await Collection.find({ user: userId }).sort({ updatedAt: -1 }).lean();
   return collections.map((collection) => ({
@@ -59,7 +69,7 @@ async function createCollection(userId, data) {
     description: data.description || "",
     color: data.color || "#7C6A9C",
     items,
-  });
+  }).then(serializeCollection);
 }
 
 async function updateCollection(userId, collectionId, data) {
@@ -77,7 +87,7 @@ async function updateCollection(userId, collectionId, data) {
   if (data.color) collection.color = data.color;
 
   await collection.save();
-  return collection;
+  return serializeCollection(collection);
 }
 
 async function deleteCollection(userId, collectionId) {
@@ -98,7 +108,7 @@ async function addItem(userId, collectionId, archiveId) {
     collection.items.push(archive._id);
     await collection.save();
   }
-  return collection;
+  return serializeCollection(collection);
 }
 
 async function removeItem(userId, collectionId, archiveId) {
@@ -107,7 +117,7 @@ async function removeItem(userId, collectionId, archiveId) {
 
   collection.items = collection.items.filter((item) => String(item) !== String(archiveId));
   await collection.save();
-  return collection;
+  return serializeCollection(collection);
 }
 
 module.exports = { listCollections, getCollection, createCollection, updateCollection, deleteCollection, addItem, removeItem };

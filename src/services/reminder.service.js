@@ -2,6 +2,19 @@ const Reminder = require("../models/Reminder");
 const Archive = require("../models/Archive");
 const { ApiError } = require("../utils/ApiError");
 
+function serializeReminder(reminder) {
+  if (!reminder) return null;
+  const obj = reminder.toObject ? reminder.toObject() : { ...reminder };
+  return {
+    ...obj,
+    id: String(obj._id),
+    archive:
+      obj.archive && typeof obj.archive === "object" && obj.archive._id
+        ? { ...obj.archive, id: String(obj.archive._id) }
+        : obj.archive || null,
+  };
+}
+
 async function listReminders(userId, query = {}) {
   const filter = { user: userId };
   if (query.completed !== undefined) filter.completed = query.completed === "true";
@@ -15,7 +28,7 @@ async function listReminders(userId, query = {}) {
     .sort({ remindAt: 1 })
     .lean();
 
-  return reminders.map((reminder) => ({ ...reminder, id: String(reminder._id) }));
+  return reminders.map(serializeReminder);
 }
 
 async function createReminder(userId, data) {
@@ -33,7 +46,7 @@ async function createReminder(userId, data) {
     remindAt: data.remindAt,
   });
 
-  return reminder.toObject();
+  return serializeReminder(reminder);
 }
 
 async function updateReminder(userId, reminderId, data) {
@@ -49,7 +62,7 @@ async function updateReminder(userId, reminderId, data) {
   }
 
   await reminder.save();
-  return reminder.toObject();
+  return serializeReminder(reminder);
 }
 
 async function deleteReminder(userId, reminderId) {
@@ -58,4 +71,4 @@ async function deleteReminder(userId, reminderId) {
   return reminder;
 }
 
-module.exports = { listReminders, createReminder, updateReminder, deleteReminder };
+module.exports = { listReminders, createReminder, updateReminder, deleteReminder, serializeReminder };
