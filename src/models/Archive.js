@@ -23,6 +23,9 @@ const archiveSchema = new mongoose.Schema(
     content: { type: String, default: "", maxlength: 100000 },
     type: { type: String, enum: ARCHIVE_TYPES, required: true, index: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
+    // Stable reference to the app taxonomy subcategory, e.g. "business:marketing".
+    // Nullable/empty for archives saved without a subcategory (backward compatible).
+    subcategory: { type: String, default: "", maxlength: 120 },
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
     tagNames: [{ type: String }],
     sourceUrl: { type: String, default: "", maxlength: 2048 },
@@ -41,6 +44,7 @@ const archiveSchema = new mongoose.Schema(
 archiveSchema.index({ user: 1, createdAt: -1 });
 archiveSchema.index({ user: 1, type: 1, createdAt: -1 });
 archiveSchema.index({ user: 1, category: 1, createdAt: -1 });
+archiveSchema.index({ user: 1, subcategory: 1, createdAt: -1 });
 archiveSchema.index({ user: 1, isFavorite: 1, createdAt: -1 });
 archiveSchema.index({ user: 1, tags: 1 });
 archiveSchema.index({ user: 1, reminderAt: 1 });

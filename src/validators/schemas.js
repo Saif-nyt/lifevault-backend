@@ -57,11 +57,14 @@ const archiveBody = {
   content: z.string().max(100000).optional(),
   type: z.enum(archiveTypes),
   category: z.union([objectId, z.null()]).optional(),
+  subcategory: z.string().trim().max(120).optional(),
   tags: z.array(z.union([objectId, z.string().trim().min(1).max(30)])).max(20).optional(),
   sourceUrl: optionalUrl,
   attachments: z.array(attachmentSchema).max(10).optional(),
   isFavorite: z.boolean().optional(),
-  reminderAt: z.union([z.coerce.date(), z.null()]).optional(),
+  // Check null first: z.coerce.date() would turn null into the Unix epoch (1970),
+  // silently creating a reminder for archives that asked for no reminder.
+  reminderAt: z.union([z.null(), z.coerce.date()]).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 };
 
@@ -76,6 +79,7 @@ const archiveQuerySchema = z.object({
   q: z.string().trim().max(200).optional(),
   type: z.enum(archiveTypes).optional(),
   category: objectId.optional(),
+  subcategory: z.string().trim().max(120).optional(),
   tag: z.string().trim().max(30).optional(),
   favorite: z.enum(["true", "false"]).optional(),
   from: z.coerce.date().optional(),

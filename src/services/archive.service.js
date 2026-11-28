@@ -122,6 +122,7 @@ async function createArchive(userId, data) {
     content: data.content || "",
     type: data.type,
     category: categoryId,
+    subcategory: data.subcategory || "",
     tags: ids,
     tagNames: names,
     sourceUrl: data.sourceUrl || "",
@@ -140,6 +141,7 @@ function buildArchiveFilter(userId, query) {
 
   if (query.type) filter.type = query.type;
   if (query.category) filter.category = query.category;
+  if (query.subcategory) filter.subcategory = query.subcategory;
   if (query.favorite !== undefined) filter.isFavorite = query.favorite === "true";
 
   if (query.from || query.to) {
@@ -220,7 +222,7 @@ async function updateArchive(userId, archiveId, data) {
     archive.metadata = validateMetadata(nextType, merged);
   }
 
-  for (const field of ["title", "description", "content", "type", "sourceUrl", "attachments", "isFavorite", "reminderAt"]) {
+  for (const field of ["title", "description", "content", "type", "sourceUrl", "subcategory", "attachments", "isFavorite", "reminderAt"]) {
     if (data[field] !== undefined) archive[field] = data[field];
   }
 
